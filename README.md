@@ -1,1 +1,3 @@
 # embarrasingly_parallel_MCMC
+
+Only 1 s: it illustrates it is embarrassing right...
