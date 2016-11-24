@@ -19,8 +19,7 @@ generate_data = function(L=10, D=2, N=50000){
   probs = runif(L,0,1)
   probs = probs/sum(probs) #standardize
   
-  n = ceiling(N*probs) # number of observations for each gaussian
-  print(n)
+  allocations = sample(seq_len(L), N, replace = TRUE) # number of observations for each gaussian
   
   sigma2 = numeric(L)
   mean = matrix(NA, ncol = D, nrow = L)
@@ -31,24 +30,38 @@ generate_data = function(L=10, D=2, N=50000){
   }
   
   #generate first gaussian outside of the loop
-  mvn_data = mvrnorm(n[1], mean[1,], diag(sigma2[1], D))
-
-  for(i in 2:L){
-    mvn_data = rbind(mvn_data, mvrnorm(n[i], mean[i,], diag(sigma2[i], D)))
+  mvn_data = mvrnorm(1, mean[allocations[1],], diag(sigma2[allocations[1]], D))
+  
+  for(i in allocations[-1]){
+    mvn_data = rbind(mvn_data, mvrnorm(1, mean[i,], diag(sigma2[i], D)))
   }
   
-  res = list(mvn_data = mvn_data, mean = mean, sigma2 = sigma2, n = n, probs=probs)
+  res = list(mvn_data = mvn_data, mean = mean, sigma2 = sigma2, probs=probs)
   return(res)
 }
 
+split_data = function(X, M){
+  N = nrow(X)
+  num_per_subset = N / M
+  if(is.integer(num_per_subset)){
+    stop("M does not divide the number of data points!")
+  }
+  subsetted_data = list()
+  for(i in seq_len(M)){
+    subsetted_data[[i]] = X[(i-1) * num_per_subset + seq_len(num_per_subset),  ]
+  }
+  return(subsetted_data)
+}
 
-set.seed(9)
-L=10
-D=2
-N=1000
-simulated_data = generate_data(L, D, N)
-plot(simulated_data[[1]], ylim=c(0,L), xlim=c(0,L))
 
+# set.seed(13)
+# L=10
+# D=2
+# N=1000
+# simulated_data = generate_data(L, D, N)
+# plot(simulated_data[[1]], ylim=c(0,L), xlim=c(0,L))
+# subsetted_data = split_data(simulated_data[[1]], 10)
+# plot(subsetted_data[[2]], ylim=c(0,L), xlim=c(0,L))
 
 ####log likelihood function####
 
@@ -60,32 +73,48 @@ log_likelihood = function(X, proposal){
   #get all the variables needed
   D = ncol(X)
   n = nrow(X)
+  L = length(proposal)/ (D + 2)
+  
+  probs = proposal[1:L]
+  mean = matrix(proposal[(L+1): ((L*D)+ L)], nrow=L, byrow=T)
+  sigma = proposal[(D*L + L +1):length(proposal)]
+  
+  tmp = numeric(L)
+  log_lik = 0
+  
+  for(i in 1:n){
+    for(j in 1:L){
+      tmp[j]=probs[j]*dmvnorm(X[i,], mean[j,], diag(sigma[j], D))
+    }
+    log_lik = log_lik + log(sum(tmp))
+  }
+  
+  return(log_lik)
+}
+
+#log_likelihood(simulated_data[[1]], c(.5,.5,7,1,5,9,.01,.01))
+
+
+log_prior = function(proposal, D){
   L = length(proposal)/(2+D)
   
   probs = proposal[1:L]
   mean = matrix(proposal[(L+1): (L*D)], nrow=L, byrow=T)
   sigma = proposal[(D*L+1):length(proposal)]
   
-  tmp = numeric(L)
-  obs_prob = numeric(n)
+  # log_prob = 0
+  # for(i in seq_len(L)){
+  #   log_prob = log_prob + dmvnorm(mean[i,], mean = rep(5, times = D), diag(1, D), log.p = TRUE)
+  # }
   
-  for(i in 1:n){
-    for(j in 1:L)
-    tmp[j]=probs[j]*dmvnorm(X[i,], mean[j,], diag(sigma[j], D))
-  }
-  
-  obs_prob = sum(tmp)
-  
-  log_lik = sum(log(obs_prob))
-  return(log_lik)
-}
-
-log_prior = function(proposal){
-  
+  return(0) # Unifrom prior, yay!
 }
 
 
 log_target = function(X_m, proposal, M=1){
-  res = log_likelihood(X_m, proposal) + log_prior(proposal)*(1/M)
+  D = ncol(X_m)
+  res = log_likelihood(X_m, proposal) + log_prior(proposal, D)*(1/M)
   return(res)
 }
+
+
