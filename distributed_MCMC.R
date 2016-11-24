@@ -67,7 +67,7 @@ spherical_random_walk_mcmc = function(log_target, num_its, init_value, sigma, D,
     
   }
   
-  walk_matrix = do.call(walk, rbind)
+  walk_matrix = do.call(rbind, walk)
   return(walk_matrix)
 }
 
