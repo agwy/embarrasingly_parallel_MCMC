@@ -22,7 +22,6 @@ sample_theta <- function(t_dot, chain_store,Gaus_Bandwidth ){
 #Algorithm 1 in paper
 nonparametric_implemetation <- function(chain_store,Verbose = TRUE){
   
-  
   total_iter <- dim(chain_store[[1]])[1]
   M <- length(chain_store)
   d <- dim(chain_store[[1]])[2]
@@ -43,7 +42,7 @@ nonparametric_implemetation <- function(chain_store,Verbose = TRUE){
                    )
           ) t_dot <- c_dot
     }
-    if( (k %%(total_iter* 0.1) == 0)  & Verbose ) print(paste("Iteration: ", k/total_iter))
+    if( (k %% (total_iter* 0.1) == 0)  & Verbose ) print(paste("Iteration: ", k/total_iter))
     
     theta_out[k,] <- sample_theta(t_dot,test3,bandwidth_set)
   }
