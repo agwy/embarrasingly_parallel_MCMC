@@ -14,7 +14,7 @@ obs_count <- 1e4
 simulated_probit_data <- sim_probit(obs_count,probit_dimension)
 
 #Test density functions and use standard GLM functions
-glm_test <- glm(simulated_probit_data$obs~simulated_probit_data$design_mat + 0,family = "binomial")
+glm_test <- glm(simulated_probit_data$obs~simulated_probit_data$design_mat + 0,family = binomial(link=probit))
 
 probit_den(observations = simulated_probit_data$obs, 
            beta = glm_test$coefficients,
@@ -28,7 +28,7 @@ augmented_density(observations = simulated_probit_data$obs,
 
 #MCMC approximation
 total_iterations <- 1000
-#Chain_count=1
+
 source("MH_MCMC_chain.R")
 test_MCMC <- MH_MCMC_chain(
   Iterations = total_iterations,
@@ -37,7 +37,7 @@ test_MCMC <- MH_MCMC_chain(
   inital_value = as.matrix(rep(0,probit_dimension)),
   observations=simulated_probit_data$obs,
   design_mat=simulated_probit_data$design_mat,
-  to_log = T,Chain_count=Chain_count)
+  to_log = T)
 
 
 
