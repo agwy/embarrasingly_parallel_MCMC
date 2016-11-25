@@ -1,7 +1,9 @@
 #Test probit
 library(Rcpp)
 library(mvtnorm)
-setwd("R/")
+library(parallel)
+
+#setwd("R/")
 
 source("probit_funcs.R")
 source("MH_MCMC_chain.R")
@@ -26,7 +28,7 @@ augmented_density(observations = simulated_probit_data$obs,
 
 #MCMC approximation
 total_iterations <- 1000
-
+#Chain_count=1
 source("MH_MCMC_chain.R")
 test_MCMC <- MH_MCMC_chain(
   Iterations = total_iterations,
@@ -85,8 +87,8 @@ test_nonparametric <- nonparametric_implemetation(test3)
 
 
 #A roughly correct answer with 1000 iterations!
-plot(test_nonparametric[,1])
-abline(h= simulated_probit_data$beta[1])
+plot(test_nonparametric[,10])
+abline(h= simulated_probit_data$beta[10])
 
 
 
