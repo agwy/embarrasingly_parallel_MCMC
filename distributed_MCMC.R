@@ -1,6 +1,9 @@
 setwd("/data/treecreeper/gouwy/OxWaSP/Module_4/embarrasingly_parallel_MCMC")
 library(parallel)
 
+
+
+
 set.seed(15)
 num_cores = 4
 num_its = 10000
