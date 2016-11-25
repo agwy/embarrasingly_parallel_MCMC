@@ -4,7 +4,7 @@ require(mvtnorm)
 #Assume chains in chain_store are of dimension rxn
 
 Weight_cal <- function(t_dot, chain_store,Gaus_Bandwidth){
-  theta_dot <- sapply(1:length(t_dot),function(x) chain_store[[x]][,t_dot[x]])
+  theta_dot <- sapply(1:length(t_dot),function(x) chain_store[[x]][t_dot[x],])
   theta_bar <- rowMeans(theta_dot)
   
   w_dot <- sum(dmvnorm(x = t(theta_dot),mean = theta_bar,diag(Gaus_Bandwidth^2,length(theta_bar)),log = T))
@@ -13,7 +13,7 @@ Weight_cal <- function(t_dot, chain_store,Gaus_Bandwidth){
 
 
 sample_theta <- function(t_dot, chain_store,Gaus_Bandwidth ){
-  theta_dot <- sapply(1:length(t_dot),function(x) chain_store[[x]][,t_dot[x]])
+  theta_dot <- sapply(1:length(t_dot),function(x) chain_store[[x]][t_dot[x],])
   theta_bar <- rowMeans(theta_dot)
   return(rmvnorm(n = 1,mean = theta_bar,sigma = diag(Gaus_Bandwidth^2,length(theta_bar))))
 }
@@ -22,15 +22,14 @@ sample_theta <- function(t_dot, chain_store,Gaus_Bandwidth ){
 #Algorithm 1 in paper
 nonparametric_implemetation <- function(chain_store,Verbose = TRUE){
   
-  
-  total_iter <- dim(chain_store[[1]])[2]
+  total_iter <- dim(chain_store[[1]])[1]
   M <- length(chain_store)
-  d <- dim(chain_store[[1]])[1]
+  d <- dim(chain_store[[1]])[2]
   
   t_dot <- sample(1:total_iter,M,replace = T)
   
   #For storing Output
-  theta_out  <- matrix(rep(0,d*total_iter),nrow=d)
+  theta_out  <- matrix(rep(0,d*total_iter),ncol=d)
   
   for(k in 1:total_iter){
     bandwidth_set <- k^(-1/(4 + d))
@@ -43,14 +42,12 @@ nonparametric_implemetation <- function(chain_store,Verbose = TRUE){
                    )
           ) t_dot <- c_dot
     }
-    if( (k %%(total_iter* 0.1) == 0)  & Verbose ) print(paste("Iteration: ", k/total_iter))
+    if( (k %% (total_iter* 0.1) == 0)  & Verbose ) print(paste("Iteration: ", k/total_iter))
     
-    theta_out[,k] <- sample_theta(t_dot,test3,bandwidth_set)
+    theta_out[k,] <- sample_theta(t_dot,test3,bandwidth_set)
   }
   
   #Faster Implementation -- seeems very serial, what can be vectorised?
-  
-  
   
   return(theta_out)
 }
