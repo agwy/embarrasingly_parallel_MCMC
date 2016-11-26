@@ -1,5 +1,6 @@
 #include<omp.h>
 #include<stdlib.h>
+#include "module4.h"
 
 void openMP(const int *restrict num_iter, 
             const int *restrict num_data, const int *restrict num_par, 
@@ -15,15 +16,15 @@ void openMP(const int *restrict num_iter,
   double *ptr_x[*M];
   double *ptr_obs[*M];
   
-  for(size_t m=0; m < *M; m++){
-    ptr_x[m] = &design_matrix[m*num_per_subset]; 
+  for(int m=0; m < *M; m++){
+    ptr_x[m] = &design_matrix[ m*num_per_subset]; 
     ptr_obs[m] = &obs[m*num_per_subset];
   }
   
 #pragma omp parallel for
-  for(size_t m = 0; m  < *M; m++){
+  for(int m = 0; m  < *M; m++){
     MCMC(num_iter, num_data, num_par, ptr_x[m], ptr_obs[m],
-         proposal_sd, init_value, M, tmp + m*(*num_data), acc_rate + m, res + (m*(*num_iter+1)));
+         proposal_sd, init_value, M, &tmp[m*(*num_data)], &acc_rate[m], &res[(m*(*num_iter+1))]);
   }
 
 }

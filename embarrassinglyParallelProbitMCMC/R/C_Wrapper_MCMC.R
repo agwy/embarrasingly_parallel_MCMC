@@ -31,7 +31,7 @@ MCMC_MH_parallel <- function(M, Iterations, Data_Matrix, Obs,Inital_beta,proposa
             as.double(proposal_sd),
             as.double(Inital_beta),
             as.integer(M), #
-            as.double(M*lenght(Obs)), #
+            as.double(M*length(Obs)), #
             acceptance_rate = as.double(1:M),
             Result = as.double(1:(M*length(Inital_beta)*(Iterations+1)))
   )
