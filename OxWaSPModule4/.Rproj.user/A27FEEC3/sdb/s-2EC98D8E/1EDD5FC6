@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "MH_MCMC_chain <- function(Iterations,target_density, proposal_sd,inital_value,...){\n  \n   accepted <- rep(0,Iterations)\n   d <- dim(inital_value)[1]\n   \n   output <- matrix(rep(NA,Iterations*d),nrow=d)\n   \n  output[,1] <- inital_value\n  proposed_value <- NA\n  for(j in 2:Iterations){\n    proposed_value <- output[,j-1] + rnorm(d,0,proposal_sd)\n    \n    if(\n      exp(sum(target_density(beta=proposed_value,...)) - sum(target_density(beta=output[,j-1],...)))\n      > runif(1)){\n        output[,j] <- proposed_value\n        accepted[j] <- 1\n    }else{\n      output[,j] <- output[,j-1]\n    }\n    if(k %% floor(Iterations*0.1) == 0 ) print(\"Iteration: \", k/Iterations)\n  }\n  print(mean(accepted))\n  return(output)\n}\n\n\n\n\n\n\n\n\n\n\n\n",
+    "created" : 1480082649558.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3145034388",
+    "id" : "1EDD5FC6",
+    "lastKnownWriteTime" : 1480082683,
+    "last_content_update" : 1480082683384,
+    "path" : "~/Desktop/Project 4/OxWaSP/R/MH_MCMC_chain.R",
+    "project_path" : "R/MH_MCMC_chain.R",
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

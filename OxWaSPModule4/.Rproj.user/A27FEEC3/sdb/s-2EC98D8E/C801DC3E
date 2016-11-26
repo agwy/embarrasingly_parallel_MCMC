@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "install.packages(\"../OxWaSP2_1.2.tar.gz\",type=\"source\",lib = \"../Packages/\")\n.libPaths(new = \"../Packages/\")\n.libPaths()\n\nlibrary(OxWaSP2,lib.loc = \"../Packages/\")\nsim_probit()\n\n\n\n\n",
+    "created" : 1480072524732.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "473461933",
+    "id" : "C801DC3E",
+    "lastKnownWriteTime" : 0,
+    "last_content_update" : 1480077527784,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

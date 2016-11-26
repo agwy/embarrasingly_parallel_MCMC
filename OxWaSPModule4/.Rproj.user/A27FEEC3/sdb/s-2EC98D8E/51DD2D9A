@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "#Test probit\nlibrary(Rcpp)\nlibrary(mvtnorm)\nlibrary(parallel)\n\nsource(\"probit_funcs.R\")\nsource(\"MH_MCMC_chain.R\")\n\n\n\nprobit_dimension <- 50\nobs_count <- 1e4\n\nsimulated_probit_data <- sim_probit(obs_count,probit_dimension)\n\n#Test density functions and use standard GLM functions\nglm_test <- glm(simulated_probit_data$obs~simulated_probit_data$design_mat + 0,family = binomial(link=\"probit\"))\n\nprobit_den(observations = simulated_probit_data$obs, \n           beta = glm_test$coefficients,\n           design_mat = simulated_probit_data$design_mat)\n\naugmented_density(observations = simulated_probit_data$obs, \n                  beta = glm_test$coefficients,\n                  design_mat = simulated_probit_data$design_mat,\n                  to_log=T)\n\n\n#MCMC approximation\ntotal_iterations <- 10000\n#Chain_count=1\nsource(\"MH_MCMC_chain.R\")\ntest_MCMC <- MH_MCMC_chain(\n  Iterations = total_iterations,\n  target_density = augmented_density,\n  proposal_sd = 0.01,\n  inital_value = as.matrix(rep(0,probit_dimension)),\n  observations=simulated_probit_data$obs,\n  design_mat=simulated_probit_data$design_mat,\n  to_log = T)\n\ndim(test_MCMC)\n\n\n\n\n#How do our MCMC approximations compare?\nplot(rowMeans(test_MCMC)-simulated_probit_data$beta)\n\naugmented_density(observations = simulated_probit_data$obs, \n                  beta = rowMeans(test_MCMC[,-1*(1:1000)]),\n                  design_mat = simulated_probit_data$design_mat,\n                  to_log=T)\n\n\n\n\n#Parallel implementation\n\nChain_count <- 8 #Number of subsets\n\n#Break the data into groups\nA <- as.list(data.frame(matrix(1:obs_count,ncol=Chain_count)[,1:(Chain_count-1)]))\nA[[Chain_count]] <- (tail(A[[Chain_count-1]],1)+1):obs_count\n\n\n#Run a chain on each group\ntest3 <- mclapply(A,\n                  function(z){t(\n                    test_MCMC <- MH_MCMC_chain(\n                      Iterations = total_iterations,\n                      target_density = augmented_density,\n                      proposal_sd = 0.01,\n                      inital_value = as.matrix(rep(0,probit_dimension)),\n                      observations=simulated_probit_data$obs[z],\n                      design_mat=simulated_probit_data$design_mat[z,], ##Pull out those observations \n                      to_log = T,\n                      Chain_count = Chain_count)\n                    )\n                  },\n                  mc.cores = min(Chain_count,8)\n)\n\n\n#Implementing the algorithm from the paper to combine chains\nsource(\"NonParametric_Density_Product_Estimates.R\")\ntest_nonparametric <- nonparametric_implemetation(test3)\n\n\ndim(test_nonparametric)\n\naugmented_density(observations = simulated_probit_data$obs, \n                  beta = colMeans(test_nonparametric),\n                  design_mat = simulated_probit_data$design_mat,\n                  to_log=T)\n\ncolMeans(test_nonparametric)\n\n#A roughly correct answer with 1000 iterations!\nplot(test_nonparametric[,10])\nabline(h= simulated_probit_data$beta[10])\n\n\n\n\n\n\n\n\n\n",
+    "created" : 1480081010545.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1455783782",
+    "id" : "51DD2D9A",
+    "lastKnownWriteTime" : 1480083504,
+    "last_content_update" : 1480083504060,
+    "path" : "~/Desktop/Project 4/Probit_example.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

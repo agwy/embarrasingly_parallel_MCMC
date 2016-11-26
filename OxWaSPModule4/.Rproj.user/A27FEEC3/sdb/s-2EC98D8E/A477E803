@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#probit model \nsim_probit <- function(n,dimension){\n  beta <- rnorm(dimension,0,1)\n  design_mat <- rmvnorm(n,mean=rep(0,dimension))\n  \n  obs <- runif(n) < pnorm(design_mat %*% beta)\n  \n  return(list(obs=obs,beta=beta,design_mat=design_mat))\n}\n\nprobit_den <- function(observations, beta,design_mat,to_log=T){\n  p_vals <- pnorm(design_mat %*% beta)\n  if(to_log){\n    return(sum( log(p_vals[observations]))+ sum(log((1-p_vals[!observations])) ))\n  }else{\n    return(prod(p_vals[observations])*prod(1-p_vals[!observations]))\n  }\n}\n\naugmented_density <- function(Chain_count=1,...){\n  return(sum(dnorm(x = list(...)$beta,mean = 0,sd = 1,log = T ))*(1/Chain_count) + probit_den(...))\n}\n\n",
+    "created" : 1480080997815.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1172761355",
+    "id" : "A477E803",
+    "lastKnownWriteTime" : 1480082695,
+    "last_content_update" : 1480082695384,
+    "path" : "~/Desktop/Project 4/OxWaSP/R/probit_funcs.R",
+    "project_path" : "R/probit_funcs.R",
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

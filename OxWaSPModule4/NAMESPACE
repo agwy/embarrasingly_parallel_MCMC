@@ -1,0 +1,2 @@
+exportPattern("^[[:alpha:]]+")
+useDynLib(OxWaSPModule4, .registration=TRUE)
