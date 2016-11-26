@@ -3,7 +3,6 @@ library(Rcpp)
 library(mvtnorm)
 library(parallel)
 
-#setwd("R/")
 
 source("probit_funcs.R")
 source("MH_MCMC_chain.R")
@@ -14,7 +13,9 @@ obs_count <- 1e4
 simulated_probit_data <- sim_probit(obs_count,probit_dimension)
 
 #Test density functions and use standard GLM functions
-glm_test <- glm(simulated_probit_data$obs~simulated_probit_data$design_mat + 0,family = binomial(link=probit))
+
+glm_test <- glm(simulated_probit_data$obs~simulated_probit_data$design_mat + 0,family = binomial(link="probit"))
+
 
 probit_den(observations = simulated_probit_data$obs, 
            beta = glm_test$coefficients,
@@ -27,7 +28,9 @@ augmented_density(observations = simulated_probit_data$obs,
 
 
 #MCMC approximation
-total_iterations <- 1000
+
+total_iterations <- 10000
+
 
 source("MH_MCMC_chain.R")
 test_MCMC <- MH_MCMC_chain(
@@ -42,11 +45,13 @@ test_MCMC <- MH_MCMC_chain(
 
 
 
+
+
 #How do our MCMC approximations compare?
 plot(rowMeans(test_MCMC)-simulated_probit_data$beta)
 
 augmented_density(observations = simulated_probit_data$obs, 
-                  beta = rowMeans(test_MCMC),
+                  beta = rowMeans(test_MCMC[,-1*(1:1000)]),
                   design_mat = simulated_probit_data$design_mat,
                   to_log=T)
 
@@ -64,7 +69,7 @@ A[[Chain_count]] <- (tail(A[[Chain_count-1]],1)+1):obs_count
 
 #Run a chain on each group
 test3 <- mclapply(A,
-                  function(z){t( 
+                  function(z){t(
                     test_MCMC <- MH_MCMC_chain(
                       Iterations = total_iterations,
                       target_density = augmented_density,
@@ -74,8 +79,7 @@ test3 <- mclapply(A,
                       design_mat=simulated_probit_data$design_mat[z,], ##Pull out those observations 
                       to_log = T,
                       Chain_count = Chain_count)
-                    
-                  )
+                    )
                   },
                   mc.cores = min(Chain_count,8)
 )
@@ -85,6 +89,15 @@ test3 <- mclapply(A,
 source("NonParametric_Density_Product_Estimates.R")
 test_nonparametric <- nonparametric_implemetation(test3)
 
+
+dim(test_nonparametric)
+
+augmented_density(observations = simulated_probit_data$obs, 
+                  beta = colMeans(test_nonparametric),
+                  design_mat = simulated_probit_data$design_mat,
+                  to_log=T)
+
+colMeans(test_nonparametric)
 
 #A roughly correct answer with 1000 iterations!
 plot(test_nonparametric[,10])

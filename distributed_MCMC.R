@@ -2,6 +2,9 @@ library(parallel)
 source("simulate_data.R")
 source("NonParametric_Density_Product_Estimates.R")
 
+
+
+
 set.seed(15)
 num_cores = 4
 L=2
