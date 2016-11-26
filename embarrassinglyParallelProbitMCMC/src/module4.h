@@ -1,0 +1,2 @@
+void log_lik(const int *restrict num_data, const int *restrict num_param, const double *restrict design_matrix, const int *restrict obs, const double *restrict beta, double *restrict tmp, double *restrict res);
+void augmented_density(const int *restrict M, const int *restrict num_data, const int *restrict num_param, const double *restrict design_matrix, const int *restrict obs, const double *restrict beta, double *restrict tmp, double *restrict res);
