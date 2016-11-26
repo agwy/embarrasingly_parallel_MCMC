@@ -20,6 +20,26 @@ MCMC_MH <- function(M, Iterations, Data_Matrix, Obs,Inital_beta,proposal_sd) {
               Acceptance_rate = ans$acceptance_rate))
 }
 
+MCMC_MH_parallel <- function(M, Iterations, Data_Matrix, Obs,Inital_beta,proposal_sd) {
+  tmp = rep(0, times = length(Obs))
+  ans <- .C("MCMC",
+            as.integer(Iterations),
+            as.integer(length(Obs)),
+            as.integer(length(Inital_beta)),
+            as.double(Data_Matrix),
+            as.integer(Obs),
+            as.double(proposal_sd),
+            as.double(Inital_beta),
+            as.integer(M), #
+            as.double(M*lenght(Obs)), #
+            acceptance_rate = as.double(1:M),
+            Result = as.double(1:(M*length(Inital_beta)*(Iterations+1)))
+  )
+  print("HEllo world")
+  return(list(Result = matrix(ans$Result,ncol=length(Inital_beta), byrow=TRUE),
+              Acceptance_rate = ans$acceptance_rate))
+}
+
 ########################################
 # #Test of augmented density:
 #
