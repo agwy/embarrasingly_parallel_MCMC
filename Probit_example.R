@@ -9,7 +9,7 @@ library(embarrassinglyParallelProbitMCMC, lib.loc="Packages")
 # source...
 
 probit_dimension <- 50
-obs_count <- 1e4
+obs_count <- 1e3
 
 simulated_probit_data <- sim_probit(obs_count,probit_dimension)
 
@@ -77,6 +77,11 @@ test3 <- mclapply(A,
                   mc.cores = min(Chain_count,8)
 )
 
+
+#openMP
+test_openMP <- MCMC_MH_parallel(Chain_count, total_iterations, simulated_probit_data$design_mat,
+                                simulated_probit_data$obs,rep(0, times=probit_dimension),
+                                0.01)
 
 #Implementing the algorithm from the paper to combine chains
 source("NonParametric_Density_Product_Estimates.R")
