@@ -21,12 +21,19 @@ MCMC_MH <- function(M, Iterations, Data_Matrix, Obs,Inital_beta,proposal_sd) {
 }
 
 MCMC_MH_parallel <- function(M, Iterations, Data_Matrix, Obs,Inital_beta,proposal_sd) {
-  tmp = rep(0, times = M*length(Obs))
-  ans <- .C("MCMC",
+  tmp = rep(0, times = length(Obs))
+  # The following can perhaps still be optimized. TODO: Make a block of memory available initially.
+  # It rearranges the data in an array of subsequent columnmajor-indexed submatrices, subsetted as in Neiswanger.
+  design_array = c()
+  num_per_subset = length(Obs) / M
+  for (m in seq_len(M)){
+    design_array = c(design_array, as.double(Data_Matrix[ ((m-1)*num_per_subset + 1) : (m * num_per_subset), ]))
+  }
+  ans <- .C("openMP",
             as.integer(Iterations),
             as.integer(length(Obs)),
             as.integer(length(Inital_beta)),
-            as.double(Data_Matrix),
+            design_array,
             as.integer(Obs),
             as.double(proposal_sd),
             as.double(Inital_beta),
