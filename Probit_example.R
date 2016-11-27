@@ -9,13 +9,13 @@ library(embarrassinglyParallelProbitMCMC, lib.loc="Packages")
 # source...
 
 probit_dimension <- 50
-obs_count <- 1e3
+obs_count <- 8e4
 
 simulated_probit_data <- sim_probit(obs_count,probit_dimension)
 
 ## MCMC approximation
 
-total_iterations <- 10000
+total_iterations <- 1e5
 
 # R Implementation of a MCMC chain:
 source("probit_funcs.R")
@@ -38,9 +38,10 @@ test_MCMC_c <- MCMC_MH(1,
                        simulated_probit_data$design_mat, 
                        simulated_probit_data$obs, 
                        rep(0, times=probit_dimension), 
-                       0.01)
+                       0.03)
 summaryRprof("timecheck_c.out")
 print(test_MCMC_c$Acceptance_rate)
+plot(test_MCMC_c$Result[,1])
 
 
 # MCMC results for the true values, R implementation:
@@ -81,7 +82,17 @@ test3 <- mclapply(A,
 #openMP
 test_openMP <- MCMC_MH_parallel(Chain_count, total_iterations, simulated_probit_data$design_mat,
                                 simulated_probit_data$obs,rep(0, times=probit_dimension),
-                                0.01)
+                                0.03)
+
+# Inspect the first beta for the first two chains:
+plot(test_openMP$Result[2:total_iterations,1])
+plot(1:10000, test_openMP$Result[10002:20001,1])
+# Inspect the second beta:
+plot(test_openMP$Result[2:total_iterations,2])
+plot(1:10000, test_openMP$Result[10002:20001,2])
+# Inspect the third beta:
+plot(test_openMP$Result[2:total_iterations,3])
+plot(1:10000, test_openMP$Result[10002:20001,3])
 
 #Implementing the algorithm from the paper to combine chains
 source("NonParametric_Density_Product_Estimates.R")
