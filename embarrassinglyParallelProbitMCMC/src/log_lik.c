@@ -27,9 +27,9 @@ void log_lik(const int *restrict num_data, const int *restrict num_param, const 
 	for(int i = 0; i < *num_data; i++){
 		
 		if(obs[i]){
-			 *res += log( (1 + gsl_sf_erf( tmp[i] / sqrt(2) )) / 2 );
+			 *res += log( 0.5 * (1 + gsl_sf_erf( tmp[i] / sqrt(2) )) );
 		}	
-		else *res += log( (1 - gsl_sf_erf(tmp[i] / sqrt(2) )) / 2 );
+		else *res += log( 0.5 * (1 - gsl_sf_erf(tmp[i] / sqrt(2) )) );
 		// TODO: vectorize? Save in tmp and add 4 at a time, or use OPENBlas? 
 		//       Look at time profiling.
 	};
@@ -54,7 +54,7 @@ void augmented_density(const int *restrict M, const int *restrict num_data, cons
 		*tmp += *(beta + i) * *(beta +i);
 	}
 
-	*res += - *tmp / 2 / *M;
+	*res += -0.5 * *tmp / *M;
 }
 	
 

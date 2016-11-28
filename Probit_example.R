@@ -11,11 +11,12 @@ library(embarrassinglyParallelProbitMCMC, lib.loc="Packages")
 probit_dimension <- 50
 obs_count <- 8e4
 
+set.seed(15)
 simulated_probit_data <- sim_probit(obs_count,probit_dimension)
 
 ## MCMC approximation
 
-total_iterations <- 1e5
+total_iterations <- 1e4
 
 # R Implementation of a MCMC chain:
 source("probit_funcs.R")
@@ -62,6 +63,7 @@ A[[Chain_count]] <- (tail(A[[Chain_count-1]],1)+1):obs_count
 
 
 #Run a chain on each group
+first_time = proc.time()
 test3 <- mclapply(A,
                   function(z){t(
                     test_MCMC <- MH_MCMC_chain(
@@ -77,12 +79,18 @@ test3 <- mclapply(A,
                   },
                   mc.cores = min(Chain_count,8)
 )
-
+proc.time() - first_time
 
 #openMP
+first_time = proc.time()
+#Rprof("timecheck_parallel_c.out")
 test_openMP <- MCMC_MH_parallel(Chain_count, total_iterations, simulated_probit_data$design_mat,
                                 simulated_probit_data$obs,rep(0, times=probit_dimension),
                                 0.03)
+#summaryRprof("timecheck_parallel_c.out")
+print("Time measured with time.proc:")
+proc.time() - first_time
+back_up <- test_openMP
 
 # Inspect the first beta for the first two chains:
 plot(test_openMP$Result[2:total_iterations,1])
