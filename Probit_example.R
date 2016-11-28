@@ -14,6 +14,7 @@ source("embarrassinglyParallelProbitMCMC/R/probit_funcs.R")
 
 probit_dimension <- 50
 obs_count <- 8e4
+proposal_sd <- 0.03
 
 set.seed(15)
 simulated_probit_data <- sim_probit(obs_count,probit_dimension)
@@ -29,7 +30,7 @@ Rprof(tmp <- tempfile())
 test_MCMC <- MH_MCMC_chain(
   Iterations = total_iterations,
   target_density = augmented_density,
-  proposal_sd = 0.01,
+  proposal_sd = proposal_sd,
   inital_value = as.matrix(rep(0,probit_dimension)),
   observations=simulated_probit_data$obs,
   design_mat=simulated_probit_data$design_mat,
@@ -50,6 +51,7 @@ test_MCMC_c <- MCMC_MH(1,
 summaryRprof("timecheck.out")
 
 proc.time() - first_time
+
 
 print(test_MCMC_c$Acceptance_rate)
 plot(test_MCMC_c$Result[,1])
@@ -77,12 +79,13 @@ A[[Chain_count]] <- (tail(A[[Chain_count-1]],1)+1):obs_count
 source("embarrassinglyParallelProbitMCMC/R/MH_MCMC_chain.R")
 #Run a chain on each group
 first_time = proc.time()
+Rprof("timecheck_parallel.out")
 test3 <- mclapply(A,
                   function(z){t(
                     test_MCMC <- MH_MCMC_chain(
                       Iterations = total_iterations,
                       target_density = augmented_density,
-                      proposal_sd = 0.01,
+                      proposal_sd = proposal_sd,
                       inital_value = as.matrix(rep(0,probit_dimension)),
                       observations=simulated_probit_data$obs[z],
                       design_mat=simulated_probit_data$design_mat[z,], ##Pull out those observations 
@@ -92,15 +95,16 @@ test3 <- mclapply(A,
                   },
                   mc.cores = min(Chain_count,8)
 )
+summaryRprof("timecheck_parallel.out")
 proc.time() - first_time
 
 #openMP
 first_time = proc.time()
-#Rprof("timecheck_parallel_c.out")
+Rprof("timecheck_parallel_c.out")
 test_openMP <- MCMC_MH_parallel(Chain_count, total_iterations, simulated_probit_data$design_mat,
                                 simulated_probit_data$obs,rep(0, times=probit_dimension),
-                                0.03)
-#summaryRprof("timecheck_parallel_c.out")
+                                proposal_sd)
+summaryRprof("timecheck_parallel_c.out")
 print("Time measured with time.proc:")
 proc.time() - first_time
 back_up <- test_openMP

@@ -1,5 +1,5 @@
-PKG_CFLAGS = -I ~/usr/local/include -march=native -mtune=native -std=c11 -fopenmp -fPIC -pg
-PKG_LIBS = -L ~/usr/lib64 -lgsl -lgslcblas -lm
+PKG_CFLAGS = -I ~/usr/local/include -march=native -mtune=native -std=c11 -fopenmp -fPIC -pg -O3 -ftree-vectorizer-verbose=2
+PKG_LIBS = -L ~/usr/lib64 -lgsl -lgslcblas -lm 
 
 all: $(SHLIB)
 
