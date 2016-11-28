@@ -15,7 +15,8 @@ void log_lik(const int *restrict num_data, const int *restrict num_param, const 
 	parameter vector and observed values. Stores the value in res.
 
  	tmp: a double array of size *num_data that is used for local computations. In this way,
-	     no extra memory needs to be allocated for every log_likelihood computation.
+	     no extra memory needs to be allocated for every log_likelihood computation. It needs 
+	     to be allocated
 	*/
 
 
@@ -24,13 +25,10 @@ void log_lik(const int *restrict num_data, const int *restrict num_param, const 
 
 	// Compute the erf values and sum them
 	*res = 0;
-	for(int i = 0; i < *num_data; i++){
-		
-		if(obs[i]){
-			 *res += log( 0.5 * (1 + gsl_sf_erf( tmp[i] / sqrt(2) )) );
-		}	
+	for(int i = 0; i < *num_data; i++){	
+		if(obs[i]) *res += log( 0.5 * (1 + gsl_sf_erf( tmp[i] / sqrt(2) )) );	// TODO: alternative: vectorized logit
 		else *res += log( 0.5 * (1 - gsl_sf_erf(tmp[i] / sqrt(2) )) );
-		// TODO: vectorize? Save in tmp and add 4 at a time, or use OPENBlas? 
+		// TODO: vectorize? Use ISPC fot this. It is not a bottleneck however.
 		//       Look at time profiling.
 	};
 }
@@ -48,7 +46,7 @@ void augmented_density(const int *restrict M, const int *restrict num_data, cons
 	for(; i < *num_param - 4; i += 4){
 		*tmp +=  *(beta + i) * *(beta + i) + *(beta + i + 1) * *(beta + i + 1) 
 		      +  *(beta + i + 2) * *(beta + i + 2) + *(beta + i + 3) * *(beta + i + 3);
-	// TODO: Can we test if this is actually faster? I'm curious.
+	// Not much faster. TODO: Is it actually vectorized?
 	}
 	for(;i < *num_param; i++){
 		*tmp += *(beta + i) * *(beta +i);
@@ -56,5 +54,6 @@ void augmented_density(const int *restrict M, const int *restrict num_data, cons
 
 	*res += -0.5 * *tmp / *M;
 }
+
 	
 

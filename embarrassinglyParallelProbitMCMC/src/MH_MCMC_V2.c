@@ -24,18 +24,12 @@ void MCMC(const int *restrict num_iter, const int *restrict num_data, const int 
   }
 
   *acc_rate = 0.0;
-/*
-  for(int i =0;i<*num_iter;i++){
-    acc_rate[i] = 0.0;  
-  }
-*/
-  
+ 
   
   //d is of length num_par
   //res is of dimesion num_iter x num_par
   
   double proposal[*num_par];
-  // double prev_beta[*num_par]; /
   double u = 0.0;
   double prop_dens = 0.0;
   double old_dens = 0.0;
@@ -49,20 +43,16 @@ void MCMC(const int *restrict num_iter, const int *restrict num_data, const int 
   for(int i = 1; i <= *num_iter; i++){
     for(int d = 0; d < *num_par; d++){
         proposal[d] = res[(i-1)*(*num_par)+d] + gsl_ran_gaussian(r, *proposal_sd); 
-        // prev_beta[d] = res[(i-1)*(*num_par)+d]; /
     }
     
     u = gsl_rng_uniform(r);
     augmented_density(M, num_data, num_par, design_matrix, obs, proposal, tmp, &prop_dens); 
-    // augmented_density(M, num_data, num_par, design_matrix, obs, prev_beta, tmp, &old_dens); /
     
-    //if((i<1100) && (i > 1000)) printf("M-H ratio: %f\n", prop_dens - old_dens);
     if( prop_dens - old_dens > log(u) ){    
       old_dens = prop_dens; 
       for(int d=0; d<*num_par; d++){
         res[i*(*num_par)+d] = proposal[d];
       }
-      //acc_rate[i-1] = 1;
 	*acc_rate += 1;
     }else{
       for(int d=0; d < *num_par; d++){res[i*(*num_par)+d] = res[(i-1)*(*num_par)+d];}
