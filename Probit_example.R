@@ -3,10 +3,14 @@ library(Rcpp)
 library(mvtnorm)
 library(parallel)
 library(profr)
+library(boot)
+
 
 library(embarrassinglyParallelProbitMCMC, lib.loc="Packages")
+detach("package:embarrassinglyParallelProbitMCMC",unload = TRUE)
 # detach?
 # source...
+source("embarrassinglyParallelProbitMCMC/R/probit_funcs.R")
 
 probit_dimension <- 50
 obs_count <- 8e4
@@ -16,12 +20,12 @@ simulated_probit_data <- sim_probit(obs_count,probit_dimension)
 
 ## MCMC approximation
 
-total_iterations <- 1e4
+total_iterations <- 1e3
 
 # R Implementation of a MCMC chain:
-source("probit_funcs.R")
-source("MH_MCMC_chain.R")
-Rprof("timecheck.out")
+first_time = proc.time()
+
+Rprof(tmp <- tempfile())
 test_MCMC <- MH_MCMC_chain(
   Iterations = total_iterations,
   target_density = augmented_density,
@@ -30,28 +34,36 @@ test_MCMC <- MH_MCMC_chain(
   observations=simulated_probit_data$obs,
   design_mat=simulated_probit_data$design_mat,
   to_log = T)
-summaryRprof("timecheck.out")
+Rprof()
+summaryRprof(tmp)
+proc.time() - first_time
 
 # C implementation of a MCMC chain:
-Rprof("timecheck_c.out")
+first_time = proc.time()
+Rprof("timecheck.out")
 test_MCMC_c <- MCMC_MH(1, 
                        total_iterations, 
                        simulated_probit_data$design_mat, 
                        simulated_probit_data$obs, 
                        rep(0, times=probit_dimension), 
-                       0.03)
-summaryRprof("timecheck_c.out")
+                       0.01)
+summaryRprof("timecheck.out")
+
+proc.time() - first_time
+
 print(test_MCMC_c$Acceptance_rate)
 plot(test_MCMC_c$Result[,1])
 
 
-# MCMC results for the true values, R implementation:
-plot(rowMeans(test_MCMC)-simulated_probit_data$beta)
+plot(colMeans(test_MCMC_c$Result),simulated_probit_data$beta)
+points(rowMeans(test_MCMC),simulated_probit_data$beta,col="red")
 
-augmented_density(observations = simulated_probit_data$obs, 
-                  beta = rowMeans(test_MCMC[,-1*(1:1000)]),
-                  design_mat = simulated_probit_data$design_mat,
-                  to_log=T)
+
+plot(test_MCMC_c$Result[,1])
+abline(h=simulated_probit_data$beta[1])
+
+dim(test_MCMC_c$Result)
+glm_test$coefficients
 
 ## Parallel implementation
 
@@ -62,6 +74,7 @@ A <- as.list(data.frame(matrix(1:obs_count,ncol=Chain_count)[,1:(Chain_count-1)]
 A[[Chain_count]] <- (tail(A[[Chain_count-1]],1)+1):obs_count
 
 
+source("embarrassinglyParallelProbitMCMC/R/MH_MCMC_chain.R")
 #Run a chain on each group
 first_time = proc.time()
 test3 <- mclapply(A,
@@ -109,11 +122,6 @@ test_nonparametric <- nonparametric_implemetation(test3)
 
 dim(test_nonparametric)
 
-augmented_density(observations = simulated_probit_data$obs, 
-                  beta = colMeans(test_nonparametric),
-                  design_mat = simulated_probit_data$design_mat,
-                  to_log=T)
-
 colMeans(test_nonparametric)
 
 #A roughly correct answer with 1000 iterations!
@@ -125,7 +133,7 @@ abline(h= simulated_probit_data$beta[10])
 
 #Test density functions and use standard GLM functions
 
-glm_test <- glm(simulated_probit_data$obs~simulated_probit_data$design_mat + 0,family = binomial(link="probit"))
+glm_test <- glm(simulated_probit_data$obs~simulated_probit_data$design_mat + 0,family = binomial(link="logit"))
 
 
 probit_den(observations = simulated_probit_data$obs, 

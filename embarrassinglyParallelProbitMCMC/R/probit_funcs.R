@@ -3,13 +3,15 @@ sim_probit <- function(n,dimension){
   beta <- rnorm(dimension,0,1)
   design_mat <- rmvnorm(n,mean=rep(0,dimension))
   
-  obs <- runif(n) < pnorm(design_mat %*% beta)
+  obs <- runif(n) < (1+ exp(-1*(design_mat %*% beta)))^(-1)
   
   return(list(obs=obs,beta=beta,design_mat=design_mat))
 }
 
 probit_den <- function(observations, beta,design_mat,to_log=T){
-  p_vals <- pnorm(design_mat %*% beta)
+  #p_vals <- (1 + exp(-1*(design_mat %*% beta)))^(-1)
+  p_vals <- inv.logit(design_mat %*% beta)
+  logit(1)
   if(to_log){
     return(sum( log(p_vals[observations]))+ sum(log((1-p_vals[!observations])) ))
   }else{
