@@ -25,7 +25,6 @@ void log_lik(const int *restrict num_data, const int *restrict num_param, const 
 
 	// Compute the erf values and sum them
 	*res = 0;
-<<<<<<< HEAD
 	for(int i = 0; i < *num_data; i++){
 		
 		if(obs[i]){
