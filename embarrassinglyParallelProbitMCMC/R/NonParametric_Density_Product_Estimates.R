@@ -13,9 +13,10 @@ Weight_cal <- function(t_dot, chain_store,Gaus_Bandwidth){
 
 
 sample_theta <- function(t_dot, chain_store,Gaus_Bandwidth ){
+  M <- length(chain_store)
   theta_dot <- sapply(1:length(t_dot),function(x) chain_store[[x]][t_dot[x],])
   theta_bar <- rowMeans(theta_dot)
-  return(rmvnorm(n = 1,mean = theta_bar,sigma = diag(Gaus_Bandwidth^2,length(theta_bar))))
+  return(rmvnorm(n = 1,mean = theta_bar,sigma = diag((Gaus_Bandwidth^2)/M,length(theta_bar))))
 }
 
 #Takes list of Markov Chains whose length is equal, and produces output according to 
@@ -27,6 +28,7 @@ nonparametric_implemetation <- function(chain_store,Verbose = TRUE){
   d <- dim(chain_store[[1]])[2]
   
   t_dot <- sample(1:total_iter,M,replace = T)
+  #print(t_dot)
   
   #For storing Output
   theta_out  <- matrix(rep(0,d*total_iter),ncol=d)

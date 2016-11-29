@@ -20,7 +20,7 @@ simulated_logit_data <- sim_logit(obs_count,logit_dimension)
 
 ## MCMC approximation
 
-total_iterations <- 1e4
+total_iterations <- 2e4
 
 # R Implementation of a MCMC chain:
 first_time = proc.time()
@@ -45,7 +45,7 @@ test_MCMC_c <- MCMC_MH(1,
                        simulated_logit_data$design_mat, 
                        simulated_logit_data$obs, 
                        rep(0, times=logit_dimension), 
-                       0.01)
+                       proposal_sd)
 proc.time() - first_time
 
 
@@ -121,16 +121,17 @@ colMeans(test_nonparametric)
 plot(test_nonparametric[,10])
 abline(h= simulated_logit_data$beta[10], col="red")
 
-# #combine the C produced chains
-# test_OpenMP_list = list()
-# total_iterations1 = total_iterations + 1
-# for(i in 1:Chain_count){
-#   test_OpenMP_list[[i]] = as.matrix(test_openMP$Result[((i-1)*total_iterations1+1):(i*total_iterations1),])
-#   test_OpenMP_list[[i]] = test_OpenMP_list[[i]][-total_iterations1,]
-# }
-# 
-# 
-# test_nonparametric_c <- nonparametric_implemetation((test_OpenMP_list))
+#combine the C produced chains
+burnin=0.2*total_iterations #introduce some burnin when dividing the openMP matrix
+test_OpenMP_list = list()
+total_iterations1 = total_iterations + 1
+for(i in 1:Chain_count){
+  test_OpenMP_list[[i]] = as.matrix(test_openMP$Result[((i-1)*total_iterations1+1+burnin):(i*total_iterations1),])
+  test_OpenMP_list[[i]] = test_OpenMP_list[[i]][-total_iterations1,]
+}
+
+
+test_nonparametric_c <- nonparametric_implemetation((test_OpenMP_list))
 # 
 # plot(test_nonparametric_c[,10])
 # abline(h= simulated_logit_data$beta[10], col="red")
@@ -151,6 +152,12 @@ simulated_logit_data$beta
 plot(test_MCMC_c$Result[,1], test_MCMC_c$Result[,2], ylim=c(0,5), xlim=c(-.5,.5))
 points(test_openMP$Result[,1], test_openMP$Result[,2], col="red",ylim=c(0,5), xlim=c(-.5,.5))
 points(test_nonparametric[,1], test_nonparametric[,2], col="blue",ylim=c(0,5), xlim=c(-.5,.5))
+
+
+####################################################
+#Combine the chains using the parametric algorithm
+
+test_parametric = parametric_implementation(test3, burnin=0.2*total_iterations)
 ######################################################
 ## TEST CODE 
 
@@ -168,7 +175,35 @@ points(test_nonparametric[,1], test_nonparametric[,2], col="blue",ylim=c(0,5), x
 #                   design_mat = simulated_logit_data$design_mat,
 #                   to_log=T)
 
+########################################################
+#some plots
+
+library(MASS)
+z = kde2d(test_MCMC_c$Result[(0.5*total_iterations):total_iterations,1], 
+          test_MCMC_c$Result[(0.5*total_iterations):total_iterations,2], n=50)#burnin 50%
+z2 = kde2d(test_openMP$Result[(0.2*total_iterations):total_iterations,1], 
+           test_openMP$Result[(0.2*total_iterations):total_iterations,2], n=50)#burnin 20%
+
+z3 = kde2d(test_nonparametric_c[,1], test_nonparametric_c[,2], n=50)#no burnin now!!!
+z_par = kde2d(test_parametric[,1], test_parametric[,2], n=50)#burnin incorporated in function, 20%
+contour(z, xlim=c(-0.5,1.5), ylim=c(1,3), col="black")
+par(new=T)
+contour(z2, xlim=c(-0.5,1.5), ylim=c(1,3), col="red")
+par(new=T)
+contour(z3,  xlim=c(-0.5,1.5), ylim=c(1,3), col="blue")
+par(new=T)
+contour(z_par, xlim=c(-0.5,1.5), ylim=c(1,3), col="yellow")
 
 
-
+z4 = kde2d(test_openMP$Result[(total_iterations+2):(2*total_iterations+2),1], 
+           test_openMP$Result[(total_iterations+2):(2*total_iterations+2),2], n=50)
+z5 = kde2d(test_openMP$Result[(2*total_iterations+3):(3*total_iterations+3),1], 
+           test_openMP$Result[(2*total_iterations+3):(3*total_iterations+3),2], n=50)
+contour(z, xlim=c(0,1), ylim=c(1,3), col="black")
+par(new=T)
+contour(z2, xlim=c(0,1), ylim=c(1,3), col="red")
+par(new=T)
+contour(z4, xlim=c(0,1), ylim=c(1,3), col="green")
+par(new=T)
+contour(z5, xlim=c(0,1), ylim=c(1,3), col="purple")
 
