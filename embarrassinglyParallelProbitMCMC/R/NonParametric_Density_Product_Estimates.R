@@ -44,7 +44,7 @@ nonparametric_implemetation <- function(chain_store,Verbose = TRUE){
     }
     if( (k %% (total_iter* 0.1) == 0)  & Verbose ) print(paste("Iteration: ", k/total_iter))
     
-    theta_out[k,] <- sample_theta(t_dot,test3,bandwidth_set)
+    theta_out[k,] <- sample_theta(t_dot,chain_store,bandwidth_set)
   }
   
   #Faster Implementation -- seeems very serial, what can be vectorised?
