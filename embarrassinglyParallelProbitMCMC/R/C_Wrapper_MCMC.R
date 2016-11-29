@@ -71,28 +71,28 @@ MCMC_MH_parallel <- function(M, Iterations, Data_Matrix, Obs,Inital_beta,proposa
 # library(parallel)
 #
 #
-# source("probit_funcs.R")
+# source("logit_funcs.R")
 # source("MH_MCMC_chain.R")
 #
-# probit_dimension <- 50
+# logit_dimension <- 50
 # obs_count <- 500000
 #
-# simulated_probit_data <- sim_probit(obs_count,probit_dimension)
+# simulated_logit_data <- sim_logit(obs_count,logit_dimension)
 #
-# glm_test <- glm(simulated_probit_data$obs~simulated_probit_data$design_mat + 0,family = binomial(link="probit"))
+# glm_test <- glm(simulated_logit_data$obs~simulated_logit_data$design_mat + 0,family = binomial(link="logit"))
 #
-# probit_den(observations = simulated_probit_data$obs,
+# logit_den(observations = simulated_logit_data$obs,
 #            beta = glm_test$coefficients,
-#            design_mat = simulated_probit_data$design_mat)
+#            design_mat = simulated_logit_data$design_mat)
 #
-# augmented_density(observations = simulated_probit_data$obs,
+# augmented_density(observations = simulated_logit_data$obs,
 #                   beta = glm_test$coefficients,
-#                   design_mat = simulated_probit_data$design_mat,
+#                   design_mat = simulated_logit_data$design_mat,
 #                   to_log=T)
 #
 # tmp = rep(0.0, times=obs_count)
 # res = 0.0;
-# augmented_density_c(1, obs_count,  probit_dimension, simulated_probit_data$design_mat, simulated_probit_data$obs, glm_test$coefficients, tmp, res)
+# augmented_density_c(1, obs_count,  logit_dimension, simulated_logit_data$design_mat, simulated_logit_data$obs, glm_test$coefficients, tmp, res)
 #
 
 
