@@ -207,3 +207,19 @@ contour(z4, xlim=c(0,1), ylim=c(1,3), col="green")
 par(new=T)
 contour(z5, xlim=c(0,1), ylim=c(1,3), col="purple")
 
+####does this make any sense?
+####data ellipses
+library(car)
+dataEllipse(test_MCMC_c$Result[(0.5*total_iterations):total_iterations,1], 
+              test_MCMC_c$Result[(0.5*total_iterations):total_iterations,2], levels=0.9,
+            col="black", xlim=c(-0.5,1), ylim=c(1,3))
+par(new=T)
+dataEllipse(test_openMP$Result[(0.2*total_iterations):total_iterations,1], 
+            test_openMP$Result[(0.2*total_iterations):total_iterations,2], levels=0.9,
+            plot.points = FALSE, col="red", xlim=c(-0.5,1), ylim=c(1,3))
+par(new=T)
+dataEllipse(test_nonparametric_c[,1], test_nonparametric_c[,2], levels=0.9,
+            plot.points = FALSE, col="blue", xlim=c(-0.5,1), ylim=c(1,3))
+par(new=T)
+dataEllipse(test_parametric[,1], test_parametric[,2], levels=0.9,
+            plot.points = FALSE, col="yellow", xlim=c(-0.5,1), ylim=c(1,3))
