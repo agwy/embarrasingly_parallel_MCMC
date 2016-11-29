@@ -139,13 +139,18 @@ abline(h= simulated_logit_data$beta[10], col="red")
 ############Compare 'full' posterior with the 'combined' posterior 
 #means for the single chain run on all data
 colMeans(t(test_MCMC))
+apply(t(test_MCMC), 2, sd)
 
 #means for the combined chain 
 colMeans(test_nonparametric)
+apply(test_nonparametric, 2, sd)
 
 #true beta used in the simulation
 simulated_logit_data$beta
 
+plot(test_MCMC_c$Result[,1], test_MCMC_c$Result[,2], ylim=c(0,5), xlim=c(-.5,.5))
+points(test_openMP$Result[,1], test_openMP$Result[,2], col="red",ylim=c(0,5), xlim=c(-.5,.5))
+points(test_nonparametric[,1], test_nonparametric[,2], col="blue",ylim=c(0,5), xlim=c(-.5,.5))
 ######################################################
 ## TEST CODE 
 
