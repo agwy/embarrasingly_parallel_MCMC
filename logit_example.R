@@ -16,8 +16,8 @@ library(embarrassinglyParallelProbitMCMC, lib.loc="Packages")
 #########################################################################
 #### simulate the data #####
 
-logit_dimension <- 50
-obs_count <- 4e4
+logit_dimension <- 50 #number of parameters
+obs_count <- 4e4 #number of observations
 
 set.seed(15)
 simulated_logit_data <- sim_logit(obs_count,logit_dimension)
@@ -25,8 +25,9 @@ simulated_logit_data <- sim_logit(obs_count,logit_dimension)
 #########################################################################
 #### MCMC approximation ####
 
-total_iterations <- 2e4
-proposal_sd <- 0.01
+total_iterations <- 2e4 #number of iterations
+proposal_sd <- 0.01 #proposal standard deviation for the random walk MCMC algorithm.
+
 #for sd 0.03 the acc rate is only 1% for the single chain;
 #sd 0.01 is used instead and the acc rate for the single chain is about 12%;
 #initial value is taken to be a vector of 0s;
