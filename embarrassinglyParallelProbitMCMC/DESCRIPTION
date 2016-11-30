@@ -1,10 +1,10 @@
 Package: embarrassinglyParallelProbitMCMC
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Parallel Logit Implementation
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Arne Gouwy,Petya Kindalova,Dominic Richards
+Maintainer: <info@stats.ox.ac.uk>
+Description: Hopes to efficiently approximate the posterior distribution of Logit coefficients under the assumption observations are independent and idintically dostributed and coefficients have a standard Gaussian prior. Fitting method is through standard symmetric random Metropolis. Implementations are in C, R and Cuda.
+License: Free to the Word
 LazyData: TRUE
 RoxygenNote: 5.0.1

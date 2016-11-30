@@ -5,7 +5,8 @@
 #' @param target_density - augmented_density function as defined.
 #' @param proposal_sd - A number for the standard deviation used for the proposal. It is the same for all parameters.
 #' @param initial_value - A vector of starting values for the chains, usually taken as a vector of zeroes.
-#' @return A matrix containing all the steps of the MH chain of dimension d x Iterations, where d is the number of parameters, i.e. length of the vector initial_value.
+#' @return A matrix containing all the steps of the MH chain of dimension d x Iterations,
+#'          where d is the number of parameters, i.e. length of the vector initial_value.
 MH_MCMC_chain <- function(Iterations,target_density, proposal_sd,inital_value,...){
 
    accepted <- rep(0,Iterations)

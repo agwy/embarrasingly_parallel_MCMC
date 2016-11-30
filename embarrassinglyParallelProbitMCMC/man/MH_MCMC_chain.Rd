@@ -16,7 +16,8 @@ MH_MCMC_chain(Iterations, target_density, proposal_sd, inital_value, ...)
 \item{initial_value}{- A vector of starting values for the chains, usually taken as a vector of zeroes.}
 }
 \value{
-A matrix containing all the steps of the MH chain of dimension d x Iterations, where d is the number of parameters, i.e. length of the vector initial_value.
+A matrix containing all the steps of the MH chain of dimension d x Iterations,
+         where d is the number of parameters, i.e. length of the vector initial_value.
 }
 \description{
 MH_MCMC_chain

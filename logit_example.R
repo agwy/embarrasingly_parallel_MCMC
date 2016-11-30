@@ -332,7 +332,8 @@ contour(full_c, xlim=c(-0.5,1.5), ylim=c(1,3), col="black")
 
 
 #for the non-parametric algorithm, the variance of the parameters
-#is quite big just by definition of the algorithm, BUT for our small number of iterations 20000;
+#is quite big relative to the other 2 algorithm
+# BUT this is just by definition of the algorithm and also for our relatively small number of iterations 20000;
 
 
 ####data ellipses
