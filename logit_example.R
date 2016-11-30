@@ -1,3 +1,5 @@
+# R CMD build embarrassinglyParallelProbitMCMC/
+# R CMD INSTALL -l Packages/ embarrassinglyParallelProbitMCMC_0.1.0.tar.gz
 #Logistic regression is used to demonstrate the speed of the parallelization#
 
 #at first Probit regression was implemented so there could be some
