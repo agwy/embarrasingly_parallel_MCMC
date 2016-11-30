@@ -24,7 +24,7 @@ simulated_logit_data <- sim_logit(obs_count,logit_dimension)
 #### MCMC approximation ####
 
 total_iterations <- 2e4
-proposal_sd <- 0.01 
+proposal_sd <- 0.01
 #for sd 0.03 the acc rate is only 1% for the single chain;
 #sd 0.01 is used instead and the acc rate for the single chain is about 12%;
 #initial value is taken to be a vector of 0s;
@@ -62,7 +62,7 @@ proc.time() - first_time
 # "qlogis"              0.04     0.04       0.04      0.04
 # "inv.logit"           0.02     0.02      78.32     71.81
 # "list"                0.02     0.02       0.02      0.02
-# 
+#
 # $by.total
 # total.time total.pct self.time self.pct
 # "MH_MCMC_chain"      109.06    100.00      0.40     0.37
@@ -80,30 +80,30 @@ proc.time() - first_time
 # "logit"                0.10      0.09      0.06     0.06
 # "qlogis"               0.04      0.04      0.04     0.04
 # "list"                 0.02      0.02      0.02     0.02
-# 
+#
 # $sample.interval
 # [1] 0.02
-# 
+#
 # $sampling.time
 # [1] 109.06
-# 
+#
 # > proc.time() - first_time
-# user  system elapsed 
-# 109.126   0.010 109.444 
+# user  system elapsed
+# 109.126   0.010 109.444
 ##########################################################
 
 # C implementation of a single MCMC chain - full data:
 first_time = proc.time()
-test_MCMC_c <- MCMC_MH(1, 
-                       total_iterations, 
-                       simulated_logit_data$design_mat, 
-                       simulated_logit_data$obs, 
-                       rep(0, times=logit_dimension), 
+test_MCMC_c <- MCMC_MH(1,
+                       total_iterations,
+                       simulated_logit_data$design_mat,
+                       simulated_logit_data$obs,
+                       rep(0, times=logit_dimension),
                        proposal_sd)
 proc.time() - first_time
 # > proc.time() - first_time
-# user  system elapsed 
-# 65.976   0.011  66.111 
+# user  system elapsed
+# 65.976   0.011  66.111
 
 #the C implementation is almost twice faster than the R (single chain; full data);
 
@@ -114,7 +114,7 @@ plot(test_MCMC_c$Result[,1])
 abline(h=simulated_logit_data$beta[1])
 
 #plot the estimated posterior mean for C (in black) and R (in red) chains
-plot(colMeans(test_MCMC_c$Result),simulated_logit_data$beta) 
+plot(colMeans(test_MCMC_c$Result),simulated_logit_data$beta)
 points(rowMeans(test_MCMC),simulated_logit_data$beta,col="red")
 abline(a=0, b = 1)
 
@@ -147,7 +147,7 @@ test3 <- mclapply(A,
                       proposal_sd = proposal_sd,
                       inital_value = as.matrix(rep(0,logit_dimension)),
                       observations=simulated_logit_data$obs[z],
-                      design_mat=simulated_logit_data$design_mat[z,], ##Pull out those observations 
+                      design_mat=simulated_logit_data$design_mat[z,], ##Pull out those observations
                       to_log = T,
                       Chain_count = Chain_count)
                     )
@@ -156,14 +156,14 @@ test3 <- mclapply(A,
 )
 proc.time() - first_time
 # > proc.time() - first_time
-# user  system elapsed 
+# user  system elapsed
 # 218.054   1.308  33.294
 
-#just out of interest, we ran the code for 16 chains 
-#and the time is 
+#just out of interest, we ran the code for 16 chains
+#and the time is
 # > proc.time() - first_time
-# user  system elapsed 
-# 292.792  49.299  70.833 
+# user  system elapsed
+# 292.792  49.299  70.833
 # > first_time = proc.time()
 
 ############################################################
@@ -176,14 +176,14 @@ test_openMP <- MCMC_MH_parallel(Chain_count, total_iterations, simulated_logit_d
                                 proposal_sd)
 proc.time() - first_time
 # > proc.time() - first_time
-# user  system elapsed 
-# 230.551   0.083  31.553 
+# user  system elapsed
+# 230.551   0.083  31.553
 
 #again out of interest, we ran the code for 16 chains
 #and the time is
 # > proc.time() - first_time
-# user  system elapsed 
-# 195.821   0.093  29.514 
+# user  system elapsed
+# 195.821   0.093  29.514
 
 # Inspect the first beta for the first chain to visually check convergence:
 plot(test_openMP$Result[2:total_iterations,1])
@@ -202,10 +202,10 @@ plot(test_openMP$Result[2:total_iterations,3])
 ##### R produced chains #####
 #combine the R produced chains; 20% burnin taken
 first_time = proc.time()
-test_nonparametric <- nonparametric_implemetation(test3, burnin=0.2*total_iterations)
+test_nonparametric <- nonparametric_implementation(test3, burnin=0.2*total_iterations)
 proc.time()-first_time
 # > proc.time()-first_time
-# user  system elapsed 
+# user  system elapsed
 # 39.307   0.076  39.494
 
 dim(test_nonparametric)
@@ -259,8 +259,8 @@ first_time=proc.time()
 test_parametric = parametric_implementation(test3, burnin=0.2*total_iterations)
 proc.time() - first_time
 # > proc.time() - first_time
-# user  system elapsed 
-# 11.940   0.001  11.976 
+# user  system elapsed
+# 11.940   0.001  11.976
 
 #mean and sd for the combined chain using the Parametric algorithm
 colMeans(test_parametric)
@@ -273,11 +273,11 @@ apply(test_parametric, 2, sd)
 
 # using the R produced chains
 first_time=proc.time()
-test_semiparametric = Semiparametric_implemetation(test3, burnin=0.2*total_iterations)
+test_semiparametric = Semiparametric_implementation(test3, burnin=0.2*total_iterations)
 proc.time() - first_time
 # > proc.time() - first_time
-# user  system elapsed 
-# 231.415   0.464 232.598 
+# user  system elapsed
+# 231.415   0.464 232.598
 
 
 #mean and sd for the combined chain using the Parametric algorithm
@@ -290,14 +290,14 @@ apply(test_semiparametric, 2, sd)
 library(MASS)
 
 #calculate the joint density for beta1 and beta2 chains for:
-#(1) the full chain 
-full_c = kde2d(test_MCMC_c$Result[(0.5*total_iterations):total_iterations,1], 
+#(1) the full chain
+full_c = kde2d(test_MCMC_c$Result[(0.5*total_iterations):total_iterations,1],
           test_MCMC_c$Result[(0.5*total_iterations):total_iterations,2], n=30)#burnin 50%
 
 #(2) the chains on subsets
 openMP_kde = list()
 for(i in 1:Chain_count){
-  openMP_kde[[i]] = kde2d(test_OpenMP_list[[i]][(0.2*total_iterations):total_iterations,1], 
+  openMP_kde[[i]] = kde2d(test_OpenMP_list[[i]][(0.2*total_iterations):total_iterations,1],
                      test_OpenMP_list[[i]][(0.2*total_iterations):total_iterations,2], n=30)
 }
 
@@ -331,7 +331,7 @@ par(new=T)
 contour(full_c, xlim=c(-0.5,1.5), ylim=c(1,3), col="black")
 
 
-#for the non-parametric algorithm, the variance of the parameters 
+#for the non-parametric algorithm, the variance of the parameters
 #is quite big just by definition of the algorithm, BUT for our small number of iterations 20000;
 
 
