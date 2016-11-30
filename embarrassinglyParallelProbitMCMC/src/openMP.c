@@ -22,7 +22,7 @@ void openMP(const int *restrict num_iter,
     ptr_x[m] = &design_matrix[m * (*num_par) * num_per_subset];
     ptr_obs[m] = &obs[m * num_per_subset];
   }
-
+//omp_set_num_threads(4);
 #pragma omp parallel for
   for(int m = 0; m  < *M; m++){
     MCMC(num_iter, &num_per_subset, num_par, ptr_x[m], ptr_obs[m],

@@ -12,7 +12,7 @@ library(profr)
 library(boot)
 
 library(embarrassinglyParallelProbitMCMC, lib.loc="Packages")
-
+#detach("package:embarrassinglyParallelProbitMCMC",unload = TRUE)
 #########################################################################
 #### simulate the data #####
 
@@ -178,6 +178,10 @@ test_openMP <- MCMC_MH_parallel(Chain_count, total_iterations, simulated_logit_d
                                 simulated_logit_data$obs,rep(0, times=logit_dimension),
                                 proposal_sd)
 proc.time() - first_time
+is.loaded("openMP")
+dyn.load("Packages/embarrassinglyParallelProbitMCMC/libs/embarrassinglyParallelProbitMCMC.so")
+source("embarrassinglyParallelProbitMCMC/R/C_Wrapper_MCMC.R")
+
 # > proc.time() - first_time
 # user  system elapsed
 # 230.551   0.083  31.553
