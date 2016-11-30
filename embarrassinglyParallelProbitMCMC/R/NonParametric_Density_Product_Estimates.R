@@ -21,11 +21,18 @@ sample_theta <- function(t_dot, chain_store,Gaus_Bandwidth ){
 
 #Takes list of Markov Chains whose length is equal, and produces output according to 
 #Algorithm 1 in paper
-nonparametric_implemetation <- function(chain_store,Verbose = TRUE){
+nonparametric_implemetation <- function(chain_store, burnin, Verbose = TRUE){
   
+  d <- dim(chain_store[[1]])[2]
   total_iter <- dim(chain_store[[1]])[1]
   M <- length(chain_store)
-  d <- dim(chain_store[[1]])[2]
+  
+  for(i in 1:M){
+    chain_store[[i]] = chain_store[[i]][burnin:total_iter,]
+  }
+  
+  total_iter <- dim(chain_store[[1]])[1]
+  
   
   t_dot <- sample(1:total_iter,M,replace = T)
   #print(t_dot)
