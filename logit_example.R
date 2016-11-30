@@ -188,7 +188,13 @@ plot(test_openMP$Result[2:total_iterations,3])
 
 ##### R produced chains #####
 #combine the R produced chains; 20% burnin taken
+first_time = proc.time()
 test_nonparametric <- nonparametric_implemetation(test3, burnin=0.2*total_iterations)
+proc.time()-first_time
+# > proc.time()-first_time
+# user  system elapsed 
+# 62.555   0.094  62.836 
+
 dim(test_nonparametric)
 
 #does the combined chain converge to the truth?
@@ -236,56 +242,71 @@ simulated_logit_data$beta
 ####################################################################
 
 # using the R produced chains
+first_time=proc.time()
 test_parametric = parametric_implementation(test3, burnin=0.2*total_iterations)
+proc.time() - first_time
+# > proc.time() - first_time
+# user  system elapsed 
+# 11.940   0.001  11.976 
 
 #mean and sd for the combined chain using the Parametric algorithm
 colMeans(test_parametric)
 apply(test_parametric, 2, sd)
 
 ###################################################################
-#some plots
+#some plots to illustrate the chain's behaviour
 
 library(MASS)
-z = kde2d(test_MCMC_c$Result[(0.5*total_iterations):total_iterations,1], 
-          test_MCMC_c$Result[(0.5*total_iterations):total_iterations,2], n=50)#burnin 50%
-z2 = kde2d(test_openMP$Result[(0.2*total_iterations):total_iterations,1], 
-           test_openMP$Result[(0.2*total_iterations):total_iterations,2], n=50)#burnin 20%
-z3 = kde2d(test_nonparametric_c[,1], test_nonparametric_c[,2], n=50) # burnin 20%
-z_par = kde2d(test_parametric[,1], test_parametric[,2], n=50)#burnin incorporated in function, 20%
-contour(z, xlim=c(-0.5,1.5), ylim=c(1,3), col="black")
-par(new=T)
-contour(z2, xlim=c(-0.5,1.5), ylim=c(1,3), col="red")
-par(new=T)
-contour(z3,  xlim=c(-0.5,1.5), ylim=c(1,3), col="blue")
-par(new=T)
-contour(z_par, xlim=c(-0.5,1.5), ylim=c(1,3), col="yellow")
+
+#calculate the joint density for beta1 and beta2 chains for:
+#(1) the full chain 
+full_c = kde2d(test_MCMC_c$Result[(0.5*total_iterations):total_iterations,1], 
+          test_MCMC_c$Result[(0.5*total_iterations):total_iterations,2], n=30)#burnin 50%
+
+#(2) the chains on subsets
+openMP_kde = list()
+for(i in 1:Chain_count){
+  openMP_kde[[i]] = kde2d(test_OpenMP_list[[i]][(0.2*total_iterations):total_iterations,1], 
+                     test_OpenMP_list[[i]][(0.2*total_iterations):total_iterations,2], n=30)
+}
+
+#(3) the combined chain using the nonparametric algorithm
+comb_nonpar = kde2d(test_nonparametric_c[,1], test_nonparametric_c[,2], n=30)
+
+#(4) the combined chain using the parametric algorithm
+comb_par = kde2d(test_parametric[,1], test_parametric[,2], n=30)
 
 
-z4 = kde2d(test_openMP$Result[(total_iterations+2):(2*total_iterations+2),1], 
-           test_openMP$Result[(total_iterations+2):(2*total_iterations+2),2], n=50)
-z5 = kde2d(test_openMP$Result[(2*total_iterations+3):(3*total_iterations+3),1], 
-           test_openMP$Result[(2*total_iterations+3):(3*total_iterations+3),2], n=50)
-contour(z, xlim=c(0,1), ylim=c(1,3), col="black")
-par(new=T)
-contour(z2, xlim=c(0,1), ylim=c(1,3), col="red")
-par(new=T)
-contour(z4, xlim=c(0,1), ylim=c(1,3), col="green")
-par(new=T)
-contour(z5, xlim=c(0,1), ylim=c(1,3), col="purple")
 
-####does this make any sense?
+#plot in a contour plot the full chain and the combined chains
+contour(full_c, xlim=c(-0.5,1.5), ylim=c(1,3), col="black")
+par(new=T)
+contour(comb_nonpar,  xlim=c(-0.5,1.5), ylim=c(1,3), col="blue")
+par(new=T)
+contour(comb_par, xlim=c(-0.5,1.5), ylim=c(1,3), col="yellow")
+
+
+#the Nonparametric chain and the openMP subsets; density for beta1 and beta2
+contour(comb_nonpar,  xlim=c(-0.5,1.5), ylim=c(1,3), col="blue")
+for(i in 1:Chain_count){
+  par(new=T)
+  contour(openMP_kde[[i]], xlim=c(-0.5,1.5), ylim=c(1,3), col=i)
+}
+par(new=T)
+contour(full_c, xlim=c(-0.5,1.5), ylim=c(1,3), col="black")
+
 ####data ellipses
-library(car)
-dataEllipse(test_MCMC_c$Result[(0.5*total_iterations):total_iterations,1], 
-              test_MCMC_c$Result[(0.5*total_iterations):total_iterations,2], levels=0.9,
-            plot.points = FALSE, col="black", xlim=c(-0.5,1), ylim=c(1,3))
-par(new=T)
-dataEllipse(test_openMP$Result[(0.2*total_iterations):total_iterations,1], 
-            test_openMP$Result[(0.2*total_iterations):total_iterations,2], levels=0.9,
-            plot.points = FALSE, col="red", xlim=c(-0.5,1), ylim=c(1,3))
-par(new=T)
-dataEllipse(test_nonparametric_c[,1], test_nonparametric_c[,2], levels=0.9,
-            plot.points = FALSE, col="blue", xlim=c(-0.5,1), ylim=c(1,3))
-par(new=T)
-dataEllipse(test_parametric[,1], test_parametric[,2], levels=0.9,
-            plot.points = FALSE, col="yellow", xlim=c(-0.5,1), ylim=c(1,3))
+# library(car)
+# dataEllipse(test_MCMC_c$Result[(0.5*total_iterations):total_iterations,1],
+#               test_MCMC_c$Result[(0.5*total_iterations):total_iterations,2], levels=0.9,
+#             plot.points = FALSE, col="black", xlim=c(-0.5,1), ylim=c(1,3))
+# par(new=T)
+# dataEllipse(test_openMP$Result[(0.2*total_iterations):total_iterations,1],
+#             test_openMP$Result[(0.2*total_iterations):total_iterations,2], levels=0.9,
+#             plot.points = FALSE, col="red", xlim=c(-0.5,1), ylim=c(1,3))
+# par(new=T)
+# dataEllipse(test_nonparametric_c[,1], test_nonparametric_c[,2], levels=0.9,
+#             plot.points = FALSE, col="blue", xlim=c(-0.5,1), ylim=c(1,3))
+# par(new=T)
+# dataEllipse(test_parametric[,1], test_parametric[,2], levels=0.9,
+#             plot.points = FALSE, col="yellow", xlim=c(-0.5,1), ylim=c(1,3))
