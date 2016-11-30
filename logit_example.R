@@ -159,6 +159,13 @@ proc.time() - first_time
 # user  system elapsed 
 # 218.054   1.308  33.294
 
+#just out of interest, we ran the code for 16 chains 
+#and the time is 
+# > proc.time() - first_time
+# user  system elapsed 
+# 292.792  49.299  70.833 
+# > first_time = proc.time()
+
 ############################################################
 ####Parallel implementation using openMP
 ############################################################
@@ -171,6 +178,12 @@ proc.time() - first_time
 # > proc.time() - first_time
 # user  system elapsed 
 # 230.551   0.083  31.553 
+
+#again out of interest, we ran the code for 16 chains
+#and the time is
+# > proc.time() - first_time
+# user  system elapsed 
+# 195.821   0.093  29.514 
 
 # Inspect the first beta for the first chain to visually check convergence:
 plot(test_openMP$Result[2:total_iterations,1])
@@ -193,7 +206,7 @@ test_nonparametric <- nonparametric_implemetation(test3, burnin=0.2*total_iterat
 proc.time()-first_time
 # > proc.time()-first_time
 # user  system elapsed 
-# 62.555   0.094  62.836 
+# 39.307   0.076  39.494
 
 dim(test_nonparametric)
 
@@ -253,6 +266,24 @@ proc.time() - first_time
 colMeans(test_parametric)
 apply(test_parametric, 2, sd)
 
+####################################################################
+#Combine the chains using the SemiParametric algorithm from the paper
+#it takes a long time to run since it combines the parametric and nonparametric algorithms
+####################################################################
+
+# using the R produced chains
+first_time=proc.time()
+test_semiparametric = Semiparametric_implemetation(test3, burnin=0.2*total_iterations)
+proc.time() - first_time
+# > proc.time() - first_time
+# user  system elapsed 
+# 231.415   0.464 232.598 
+
+
+#mean and sd for the combined chain using the Parametric algorithm
+colMeans(test_semiparametric)
+apply(test_semiparametric, 2, sd)
+
 ###################################################################
 #some plots to illustrate the chain's behaviour
 
@@ -276,7 +307,8 @@ comb_nonpar = kde2d(test_nonparametric_c[,1], test_nonparametric_c[,2], n=30)
 #(4) the combined chain using the parametric algorithm
 comb_par = kde2d(test_parametric[,1], test_parametric[,2], n=30)
 
-
+#(5) the combined chain using the semiparametric algorithm
+comb_semipar = kde2d(test_semiparametric[,1], test_semiparametric[,2], n=30)
 
 #plot in a contour plot the full chain and the combined chains
 contour(full_c, xlim=c(-0.5,1.5), ylim=c(1,3), col="black")
@@ -284,9 +316,12 @@ par(new=T)
 contour(comb_nonpar,  xlim=c(-0.5,1.5), ylim=c(1,3), col="blue")
 par(new=T)
 contour(comb_par, xlim=c(-0.5,1.5), ylim=c(1,3), col="yellow")
+#par(new=T)
+#contour(comb_semipar, xlim=c(-0.5,1.5), ylim=c(1,3), col="pink")
+#the semiparametric method gives similar results to the parametric (for this example)
 
 
-#the Nonparametric chain and the openMP subsets; density for beta1 and beta2
+#the Nonparametric chain and the openMP subsets (all M); density for beta1 and beta2
 contour(comb_nonpar,  xlim=c(-0.5,1.5), ylim=c(1,3), col="blue")
 for(i in 1:Chain_count){
   par(new=T)
@@ -294,6 +329,11 @@ for(i in 1:Chain_count){
 }
 par(new=T)
 contour(full_c, xlim=c(-0.5,1.5), ylim=c(1,3), col="black")
+
+
+#for the non-parametric algorithm, the variance of the parameters 
+#is quite big just by definition of the algorithm, BUT for our small number of iterations 20000;
+
 
 ####data ellipses
 # library(car)
@@ -310,3 +350,6 @@ contour(full_c, xlim=c(-0.5,1.5), ylim=c(1,3), col="black")
 # par(new=T)
 # dataEllipse(test_parametric[,1], test_parametric[,2], levels=0.9,
 #             plot.points = FALSE, col="yellow", xlim=c(-0.5,1), ylim=c(1,3))
+# par(new=T)
+# dataEllipse(test_semiparametric[,1], test_semiparametric[,2], levels=0.9,
+#             plot.points = FALSE, col="pink", xlim=c(-0.5,1), ylim=c(1,3))

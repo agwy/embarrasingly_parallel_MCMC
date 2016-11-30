@@ -42,16 +42,19 @@ nonparametric_implemetation <- function(chain_store, burnin, Verbose = TRUE){
   
   for(k in 1:total_iter){
     bandwidth_set <- k^(-1/(4 + d))
+    old_weight <- Weight_cal(t_dot = t_dot,Gaus_Bandwidth =bandwidth_set,chain_store = chain_store )
     for(j in 1:M){
       c_dot <- t_dot
       c_dot[j] <- sample(1:total_iter,1)
       u <- runif(1)
-      if( u <  exp(Weight_cal(t_dot = c_dot,Gaus_Bandwidth =bandwidth_set,chain_store = chain_store ) - 
-                   Weight_cal(t_dot = t_dot,Gaus_Bandwidth =bandwidth_set,chain_store = chain_store ) 
-                   )
-          ) t_dot <- c_dot
+      new_weight <-Weight_cal(t_dot = c_dot,Gaus_Bandwidth =bandwidth_set,chain_store = chain_store ) 
+      if( u <  exp( new_weight- old_weight)
+      ) {
+        t_dot <- c_dot
+        old_weight <- new_weight
+      }
     }
-    if( (k %% (total_iter* 0.1) == 0)  & Verbose ) print(paste("Iteration: ", k/total_iter))
+    if( (k %% floor(total_iter* 0.1) == 0)  & Verbose ) print(paste("Iteration: ", round(k/total_iter,digits = 3)))
     
     theta_out[k,] <- sample_theta(t_dot,chain_store,bandwidth_set)
   }
