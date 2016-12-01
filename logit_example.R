@@ -315,7 +315,7 @@ for(i in 1:Chain_count){
 }
 
 #(3) the combined chain using the nonparametric algorithm
-comb_nonpar = kde2d(test_nonparametric_c[,1], test_nonparametric_c[,2], n=30)
+comb_nonpar = kde2d(test_nonparametric[,1], test_nonparametric[,2], n=30)
 
 #(4) the combined chain using the parametric algorithm
 comb_par = kde2d(test_parametric[,1], test_parametric[,2], n=30)
