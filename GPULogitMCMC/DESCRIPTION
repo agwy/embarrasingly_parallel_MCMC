@@ -1,0 +1,15 @@
+Package: GPULogitMCMC
+Type: Package
+Title: GPU implementations of a random walk Metropolis-Hastings algorithm targetting 
+  the posterior distribution of the parameters of a Logistic regression model.
+Version: 1.0
+Date: 2016-12-01
+Author: Arne Gouwy, Petya Kindalova, Dominic Richards
+Maintainer: Arne Gouwy <arne.gouwy@spc.ox.ac.uk>
+Description: Performs a random walk Methropolis-Hastings algorithm on the posterior distribution of the parameters of a logistic regression model. 
+	Uses spherical diagonal normal distributed proposals. The computations of the matrix multiplications and logistic function are parallelised.
+	One implementation uses manual matrix multiplications, another uses the cuBLAS library. Wrappers are also provided to compute the 
+	log-likelihood functions separately.
+License: GPL-2
+NeedsCompilation: yes
+Packaged: 2016-12-01 11:24 UTC

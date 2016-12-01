@@ -1,0 +1,19 @@
+PKG_CFLAGS = -I ~/usr/local/include -march=native -mtune=native -std=c11 -fopenmp
+PKG_LIBS = -L ~/usr/local/lib -lgsl -lopenblas -L/opt/cuda-8.0/lib64 -lcudart -lcublas
+
+all: $(SHLIB)
+
+LL_probit.o: LL_probit.c
+	/opt/cuda-8.0/bin/nvcc -c LL_probit.c -x cu -m64 -O3 -gencode=arch=compute_35,code=compute_35 --ptxas-options=-v --use_fast_math --compiler-options '-fPIC'
+
+GPU_probit_MCMC.o: GPU_probit_MCMC.c
+	/opt/cuda-8.0/bin/nvcc  -c GPU_probit_MCMC.c -x cu -m64 -O3 -gencode=arch=compute_35,code=compute_35 --ptxas-options=-v --use_fast_math --compiler-options '-fPIC'
+
+LL_logit.o: LL_logit.c
+	/opt/cuda-8.0/bin/nvcc -c LL_logit.c -x cu -m64 -O3 -gencode=arch=compute_35,code=compute_35 --ptxas-options=-v --use_fast_math --compiler-options '-fPIC'
+  
+GPU_logit_MCMC.o: GPU_logit_MCMC.c
+	/opt/cuda-8.0/bin/nvcc  -c GPU_logit_MCMC.c -x cu -m64 -O3 -gencode=arch=compute_35,code=compute_35 --ptxas-options=-v --use_fast_math --compiler-options '-fPIC'
+
+GPU_logit_MCMC_cuBLAS.o: GPU_logit_MCMC_cuBLAS.c
+	/opt/cuda-8.0/bin/nvcc  -c GPU_logit_MCMC_cuBLAS.c -x cu -m64 -O3 -gencode=arch=compute_35,code=compute_35 --ptxas-options=-v --use_fast_math --compiler-options '-fPIC'
