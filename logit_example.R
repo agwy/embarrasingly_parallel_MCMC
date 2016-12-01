@@ -243,7 +243,7 @@ for(i in 1:Chain_count){
 }
 
 #combine the R produced chains; 20% burnin taken
-test_nonparametric_c <- nonparametric_implemetation(test_OpenMP_list, burnin=0.2*total_iterations)
+test_nonparametric_c <- nonparametric_implementation(test_OpenMP_list, burnin=0.2*total_iterations)
 
 #Inspect the first beta for the combibed chain
 plot(test_nonparametric_c[,10])
