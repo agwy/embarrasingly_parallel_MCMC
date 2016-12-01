@@ -167,6 +167,8 @@ proc.time() - first_time
 ####Parallel implementation using openMP
 ############################################################
 
+#this was run on our machines and the number of threads is fixed to 8,
+#on our machines the maximum number of threads is 8:
 first_time = proc.time()
 test_openMP <- MCMC_MH_parallel(Chain_count, total_iterations, simulated_logit_data$design_mat,
                                 simulated_logit_data$obs,rep(0, times=logit_dimension),
