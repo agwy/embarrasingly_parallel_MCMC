@@ -28,9 +28,9 @@ simulated_logit_data <- sim_logit(obs_count,logit_dimension)
 total_iterations <- 2e4 #number of iterations
 proposal_sd <- 0.01 #proposal standard deviation for the random walk MCMC algorithm.
 
-#for sd 0.03 the acc rate is only 1% for the single chain;
-#sd 0.01 is used instead and the acc rate for the single chain is about 12%;
-#initial value is taken to be a vector of 0s;
+#For proposal standard deviation 0.03 - the acc rate is only 1% for the single chain;
+#So, proposal standard deviation 0.01 is used instead and the acc rate for the single chain is about 12%;
+#Initial value is taken to be a vector of 0s, i.e. the markov chain starts from 0 for each parameter;
 
 # R Implementation of a single MCMC chain - full data:
 first_time = proc.time()
@@ -50,49 +50,43 @@ proc.time() - first_time
 # > summaryRprof(tmp)
 # $by.self
 # self.time self.pct total.time total.pct
-# "%*%"                56.60    51.90      56.60     51.90
-# "logit_den"          26.44    24.24     108.12     99.14
-# "plogis"             21.70    19.90      78.30     71.80
-# "!"                   2.44     2.24       2.44      2.24
-# "sum"                 0.64     0.59       0.64      0.59
-# "MH_MCMC_chain"       0.40     0.37     109.06    100.00
-# "-"                   0.20     0.18       0.20      0.18
-# "target_density"      0.14     0.13     108.38     99.38
-# "runif"               0.14     0.13       0.14      0.13
-# "rnorm"               0.12     0.11       0.12      0.11
-# "dnorm"               0.10     0.09       0.12      0.11
-# "logit"               0.06     0.06       0.10      0.09
-# "qlogis"              0.04     0.04       0.04      0.04
-# "inv.logit"           0.02     0.02      78.32     71.81
-# "list"                0.02     0.02       0.02      0.02
-#
+# "%*%"                58.00    46.33      58.00     46.33
+# "logit_den"          34.18    27.30     124.38     99.36
+# "plogis"             30.20    24.13      88.20     70.46
+# "!"                   1.14     0.91       1.14      0.91
+# "sum"                 0.66     0.53       0.66      0.53
+# "MH_MCMC_chain"       0.30     0.24     125.18    100.00
+# "-"                   0.24     0.19       0.24      0.19
+# "target_density"      0.12     0.10     124.64     99.57
+# "dnorm"               0.12     0.10       0.12      0.10
+# "runif"               0.12     0.10       0.12      0.10
+# "rnorm"               0.08     0.06       0.08      0.06
+# "+"                   0.02     0.02       0.02      0.02
+# 
 # $by.total
 # total.time total.pct self.time self.pct
-# "MH_MCMC_chain"      109.06    100.00      0.40     0.37
-# "target_density"     108.38     99.38      0.14     0.13
-# "logit_den"          108.12     99.14     26.44    24.24
-# "inv.logit"           78.32     71.81      0.02     0.02
-# "plogis"              78.30     71.80     21.70    19.90
-# "%*%"                 56.60     51.90     56.60    51.90
-# "!"                    2.44      2.24      2.44     2.24
-# "sum"                  0.64      0.59      0.64     0.59
-# "-"                    0.20      0.18      0.20     0.18
-# "runif"                0.14      0.13      0.14     0.13
-# "rnorm"                0.12      0.11      0.12     0.11
-# "dnorm"                0.12      0.11      0.10     0.09
-# "logit"                0.10      0.09      0.06     0.06
-# "qlogis"               0.04      0.04      0.04     0.04
-# "list"                 0.02      0.02      0.02     0.02
-#
+# "MH_MCMC_chain"      125.18    100.00      0.30     0.24
+# "target_density"     124.64     99.57      0.12     0.10
+# "logit_den"          124.38     99.36     34.18    27.30
+# "plogis"              88.20     70.46     30.20    24.13
+# "%*%"                 58.00     46.33     58.00    46.33
+# "!"                    1.14      0.91      1.14     0.91
+# "sum"                  0.66      0.53      0.66     0.53
+# "-"                    0.24      0.19      0.24     0.19
+# "dnorm"                0.12      0.10      0.12     0.10
+# "runif"                0.12      0.10      0.12     0.10
+# "rnorm"                0.08      0.06      0.08     0.06
+# "+"                    0.02      0.02      0.02     0.02
+# 
 # $sample.interval
 # [1] 0.02
-#
+# 
 # $sampling.time
-# [1] 109.06
-#
+# [1] 125.18
+# 
 # > proc.time() - first_time
-# user  system elapsed
-# 109.126   0.010 109.444
+# user  system elapsed 
+# 125.375   0.096 125.592 
 ##########################################################
 
 # C implementation of a single MCMC chain - full data:
@@ -178,13 +172,22 @@ test_openMP <- MCMC_MH_parallel(Chain_count, total_iterations, simulated_logit_d
                                 simulated_logit_data$obs,rep(0, times=logit_dimension),
                                 proposal_sd)
 proc.time() - first_time
-is.loaded("openMP")
-dyn.load("Packages/embarrassinglyParallelProbitMCMC/libs/embarrassinglyParallelProbitMCMC.so")
-source("embarrassinglyParallelProbitMCMC/R/C_Wrapper_MCMC.R")
+#is.loaded("openMP")
+#dyn.load("Packages/embarrassinglyParallelProbitMCMC/libs/embarrassinglyParallelProbitMCMC.so")
+#source("embarrassinglyParallelProbitMCMC/R/C_Wrapper_MCMC.R")
 
 # > proc.time() - first_time
 # user  system elapsed
 # 230.551   0.083  31.553
+
+#we wanted to fix the number of threads to 4 and check the time again
+#this line was added to our openMP C function
+#omp_set_num_threads(4);
+#and the run time is
+# > proc.time() - first_time
+# user  system elapsed 
+# 195.658   0.044  49.423 
+#which confirms we are using multithreading and the mclapply function does as well;  
 
 #again out of interest, we ran the code for 16 chains
 #and the time is
@@ -192,7 +195,8 @@ source("embarrassinglyParallelProbitMCMC/R/C_Wrapper_MCMC.R")
 # user  system elapsed
 # 195.821   0.093  29.514
 
-# Inspect the first beta for the first chain to visually check convergence:
+# Inspect the first beta for the first chain to visually check convergence
+# We expect some deviations since only (1/M)th of the data is used:
 plot(test_openMP$Result[2:total_iterations,1])
 
 # Inspect the second beta:
