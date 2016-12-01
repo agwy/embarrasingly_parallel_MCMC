@@ -28,11 +28,11 @@ void log_lik(const int *restrict num_data, const int *restrict num_param, const 
 	for(int i = 0; i < *num_data; i++){
 
 		if(obs[i]){
-		  *res += log( pow((1 + exp(-tmp[i])),-1) );
+		  *res += - log( 1 + exp(-tmp[i]) );
 			 //*res += log( 0.5 * (1 + gsl_sf_erf( tmp[i] / sqrt(2) )) );
 		}
 		else {
-		  *res += log(1 -  pow((1 + exp(-tmp[i])),-1) );
+		  *res += - log(1 + exp(tmp[i]) );
 		  //*res += log( 0.5 * (1 - gsl_sf_erf(tmp[i] / sqrt(2) )) );
 		}
 		// TODO: vectorize? Save in tmp and add 4 at a time, or use OPENBlas?
